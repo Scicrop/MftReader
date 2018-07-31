@@ -1,0 +1,5 @@
+
+*.exe
+*.pdb
+*.config
+c-sharp-land/MftReader/obj

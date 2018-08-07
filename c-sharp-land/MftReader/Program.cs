@@ -11,35 +11,104 @@ namespace MftReader
 {
     class Program
     {
+
+        public static List<String> nameLst = null;
+
         static void Main(string[] args)
         {
+
+            if (args.Length != 2)
+            {
+                String message = "Invalid parameters. Usage example: C: C:/temp/test.json *";
+                Console.WriteLine(message);
+                Console.ReadLine();
+                System.Environment.Exit(0);
+            }
+
+
+            String driveLetter =  args[0]; // C
+            String fileNamePath = args[1]; // @"c:\temp;
+            nameLst = new List<string>();
             Dictionary<ulong, FileNameAndParentFrn> mDict = new Dictionary<ulong, FileNameAndParentFrn>();
 
             EnumerateVolume.PInvokeWin32 mft = new EnumerateVolume.PInvokeWin32();
-            mft.Drive = "C:";
-            mft.EnumerateVolume(out mDict, new string[] { "*" });
+            mft.Drive = driveLetter;
+            mft.Drive = mft.Drive + ":";
+            mft.EnumerateVolume(out mDict);
             StringBuilder sb = new StringBuilder();
+            sb.AppendLine("{'objectLst': [");
+            int i = 0;
             foreach (KeyValuePair<UInt64, FileNameAndParentFrn> entry in mDict)
             {
                 FileNameAndParentFrn file = (FileNameAndParentFrn)entry.Value;
 
-                sb.AppendLine(file.Name + "; " + entry.Key + "; " + file.ParentFrn);
+                if (file.Name.Contains(".txt"))
+                {
+                    sb.Append(driveLetter+":\\");
+                    searchId(file.ParentFrn, mDict);
 
+                    nameLst.Reverse();
+
+                    foreach (var item in nameLst)
+                    {
+                        //long fileLenght = FileInfo(path).Length;
+                        sb.Append(item + "\\");
+                    }
+
+                    if (File.Exists(file.Name))
+                    {
+
+                        sb.AppendLine("{ \"fileName\": " + file.Name + " ");
+                    }
+                    nameLst.Clear();
+                }
             }
-            WriteToFile(sb.ToString());
-            Console.WriteLine("DONE");
+            sb.AppendLine("]}");
+
+
+
+            WriteToFile(sb.ToString(), fileNamePath + "/" + driveLetter + ".json");
+
+            Console.ReadLine();
         }
 
-        public static void WriteToFile(String line)
+        public static FileNameAndParentFrn searchId(ulong key, Dictionary<ulong, FileNameAndParentFrn> mDict)
         {
-            string path = @"c:\temp\MyTest.txt";
-            line = line + Environment.NewLine;
-            if (!File.Exists(path))
+            
+            FileNameAndParentFrn file = null;
+            if (mDict.ContainsKey(key))
             {
-                File.WriteAllText(path, line);
+                file = mDict[key];
+                
+                nameLst.Add(file.Name);
+                
+                while (file != null)
+                {
+                    file = searchId(file.ParentFrn, mDict);              
+                }
             }
-            File.AppendAllText(path, line);
 
+            
+            return file;
+        }
+
+        public static void WriteToFile(String line, String fileNamePath)
+        {
+            try
+            {
+                line = line + Environment.NewLine;
+                if (!File.Exists(fileNamePath))
+                {
+
+                    File.WriteAllText(fileNamePath, line);
+
+                }
+                File.AppendAllText(fileNamePath, line);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
         }
     }
 
@@ -196,7 +265,7 @@ namespace MftReader
             #endregion
 
             public void EnumerateVolume(
-               out Dictionary<UInt64, FileNameAndParentFrn> files, string[] fileExtensions)
+               out Dictionary<UInt64, FileNameAndParentFrn> files)
             {
                 files = new Dictionary<ulong, FileNameAndParentFrn>();
                 IntPtr medBuffer = IntPtr.Zero;
@@ -208,7 +277,7 @@ namespace MftReader
                     CreateChangeJournal();
 
                     SetupMFT_Enum_DataBuffer(ref medBuffer);
-                    EnumerateFiles(medBuffer, ref files, fileExtensions);
+                    EnumerateFiles(medBuffer, ref files);
                 }
                 catch (Exception e)
                 {
@@ -289,7 +358,7 @@ namespace MftReader
                 }
             }
 
-            unsafe public void EnumerateFiles(IntPtr medBuffer, ref Dictionary<ulong, FileNameAndParentFrn> files, string[] fileExtensions)
+            unsafe public void EnumerateFiles(IntPtr medBuffer, ref Dictionary<ulong, FileNameAndParentFrn> files)
             {
                 IntPtr pData = Marshal.AllocHGlobal(sizeof(UInt64) + 0x10000);
                 PInvokeWin32.ZeroMemory(pData, sizeof(UInt64) + 0x10000);
@@ -325,77 +394,25 @@ namespace MftReader
                         }
                         else
                         {
-                            //   
-                            // handle files  
-                            //  
 
-                            // at this point we could get the * for the extension
-                            bool add = true;
-                            bool fullpath = false;
-                            if (fileExtensions != null && fileExtensions.Length != 0)
+                            if (!files.ContainsKey(usn.FileReferenceNumber))
                             {
-                                if (fileExtensions[0].ToString() == "*")
+                                files.Add(usn.FileReferenceNumber,
+                                    new FileNameAndParentFrn(usn.FileName, usn.ParentFileReferenceNumber));
+                            }
+                            else
+                            {
+                                FileNameAndParentFrn frn = files[usn.FileReferenceNumber];
+                                if (0 != string.Compare(usn.FileName, frn.Name, true))
                                 {
-                                    add = true;
-                                    fullpath = true;
-                                }
-                                else
-                                {
-                                    add = false;
-                                    string s = Path.GetExtension(usn.FileName);
-                                    foreach (string extension in fileExtensions)
-                                    {
-                                        if (0 == string.Compare(s, extension, true))
-                                        {
-                                            add = true;
-                                            break;
-                                        }
-                                    }
+                                    //	Log.InfoFormat(
+                                    //	"Attempt to add duplicate file reference number: {0} for file {1}, file from index {2}",
+                                    //	usn.FileReferenceNumber, usn.FileName, frn.Name);
+                                    throw new Exception(string.Format("Duplicate FRN: {0} for {1}",
+                                        usn.FileReferenceNumber, usn.FileName));
                                 }
                             }
-                            if (add)
-                            {
-                                if (fullpath)
-                                {
-                                    if (!files.ContainsKey(usn.FileReferenceNumber))
-                                    {
-                                        files.Add(usn.FileReferenceNumber,
-                                            new FileNameAndParentFrn(usn.FileName, usn.ParentFileReferenceNumber));
-                                    }
-                                    else
-                                    {
-                                        FileNameAndParentFrn frn = files[usn.FileReferenceNumber];
-                                        if (0 != string.Compare(usn.FileName, frn.Name, true))
-                                        {
-                                            //	Log.InfoFormat(
-                                            //	"Attempt to add duplicate file reference number: {0} for file {1}, file from index {2}",
-                                            //	usn.FileReferenceNumber, usn.FileName, frn.Name);
-                                            throw new Exception(string.Format("Duplicate FRN: {0} for {1}",
-                                                usn.FileReferenceNumber, usn.FileName));
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    if (!files.ContainsKey(usn.FileReferenceNumber))
-                                    {
-                                        files.Add(usn.FileReferenceNumber,
-                                            new FileNameAndParentFrn(usn.FileName, usn.ParentFileReferenceNumber));
-                                    }
-                                    else
-                                    {
-                                        FileNameAndParentFrn frn = files[usn.FileReferenceNumber];
-                                        if (0 != string.Compare(usn.FileName, frn.Name, true))
-                                        {
-                                            //	Log.InfoFormat(
-                                            //	"Attempt to add duplicate file reference number: {0} for file {1}, file from index {2}",
-                                            //	usn.FileReferenceNumber, usn.FileName, frn.Name);
-                                            throw new Exception(string.Format("Duplicate FRN: {0} for {1}",
-                                                usn.FileReferenceNumber, usn.FileName));
-                                        }
-                                    }
-                                }
-                            }
+
                         }
                         pUsnRecord = new IntPtr(pUsnRecord.ToInt32() + usn.RecordLength);
                         outBytesReturned -= usn.RecordLength;

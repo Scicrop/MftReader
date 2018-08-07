@@ -1,0 +1,16 @@
+C:\Users\Administrator\Documents\GitHub\MftReader\c-sharp-land\MftReaderTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.dll
+C:\Users\Administrator\Documents\GitHub\MftReader\c-sharp-land\MftReaderTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.Interface.dll
+C:\Users\Administrator\Documents\GitHub\MftReader\c-sharp-land\MftReaderTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.dll
+C:\Users\Administrator\Documents\GitHub\MftReader\c-sharp-land\MftReaderTests\bin\Debug\MftReaderTests.dll
+C:\Users\Administrator\Documents\GitHub\MftReader\c-sharp-land\MftReaderTests\bin\Debug\MftReaderTests.pdb
+C:\Users\Administrator\Documents\GitHub\MftReader\c-sharp-land\MftReaderTests\bin\Debug\MftReader.exe
+C:\Users\Administrator\Documents\GitHub\MftReader\c-sharp-land\MftReaderTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.dll
+C:\Users\Administrator\Documents\GitHub\MftReader\c-sharp-land\MftReaderTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll
+C:\Users\Administrator\Documents\GitHub\MftReader\c-sharp-land\MftReaderTests\bin\Debug\MftReader.pdb
+C:\Users\Administrator\Documents\GitHub\MftReader\c-sharp-land\MftReaderTests\bin\Debug\MftReader.exe.config
+C:\Users\Administrator\Documents\GitHub\MftReader\c-sharp-land\MftReaderTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.xml
+C:\Users\Administrator\Documents\GitHub\MftReader\c-sharp-land\MftReaderTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.xml
+C:\Users\Administrator\Documents\GitHub\MftReader\c-sharp-land\MftReaderTests\obj\Debug\MftReaderTests.csprojResolveAssemblyReference.cache
+C:\Users\Administrator\Documents\GitHub\MftReader\c-sharp-land\MftReaderTests\obj\Debug\MftReaderTests.csproj.CoreCompileInputs.cache
+C:\Users\Administrator\Documents\GitHub\MftReader\c-sharp-land\MftReaderTests\obj\Debug\MftReaderTests.dll
+C:\Users\Administrator\Documents\GitHub\MftReader\c-sharp-land\MftReaderTests\obj\Debug\MftReaderTests.pdb

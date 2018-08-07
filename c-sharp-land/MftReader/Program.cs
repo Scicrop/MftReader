@@ -36,12 +36,13 @@ namespace MftReader
             mft.Drive = mft.Drive + ":";
             mft.EnumerateVolume(out mDict);
             StringBuilder sb = new StringBuilder();
+            StringBuilder pathSb = null;
             sb.AppendLine("{'objectLst': [");
             int i = 0;
             foreach (KeyValuePair<UInt64, FileNameAndParentFrn> entry in mDict)
             {
                 FileNameAndParentFrn file = (FileNameAndParentFrn)entry.Value;
-
+                pathSb = new StringBuilder();
                 if (file.Name.Contains(".txt"))
                 {
                     sb.Append(driveLetter+":\\");
@@ -51,13 +52,19 @@ namespace MftReader
 
                     foreach (var item in nameLst)
                     {
-                        //long fileLenght = FileInfo(path).Length;
+                        
                         sb.Append(item + "\\");
+                        pathSb.Append(item + "\\");
                     }
 
                     if (File.Exists(file.Name))
                     {
 
+                        
+                        pathSb.Append(file.Name);
+
+
+                        //long fileLenght = FileInfo(pathSb).Length;
                         sb.AppendLine("{ \"fileName\": " + file.Name + " ");
                     }
                     nameLst.Clear();

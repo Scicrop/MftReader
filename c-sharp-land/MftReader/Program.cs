@@ -5,7 +5,8 @@ using System.Text;
 using System.Runtime.InteropServices;
 using System.IO;
 using System.ComponentModel;
-
+using System.Security.AccessControl;
+using System.Security.Principal;
 
 namespace MftReader
 {
@@ -13,13 +14,22 @@ namespace MftReader
     {
 
         public static List<String> nameLst = null;
+        public static List<String> finalNameLst = null;
+
+        private static string GetOwnerName(string path)
+        {
+            FileSecurity fileSecurity = File.GetAccessControl(path);
+            IdentityReference identityReference = fileSecurity.GetOwner(typeof(SecurityIdentifier));
+            NTAccount ntAccount = identityReference.Translate(typeof(NTAccount)) as NTAccount;
+            return ntAccount.Value;
+        }
 
         static void Main(string[] args)
         {
 
-            if (args.Length != 2)
+            if (args.Length != 3)
             {
-                String message = "Invalid parameters. Usage example: C: C:/temp/test.json *";
+                String message = "Invalid parameters. Usage example: MftReader.exe C: C:/temp/test.json .cs";
                 Console.WriteLine(message);
                 Console.ReadLine();
                 System.Environment.Exit(0);
@@ -27,7 +37,8 @@ namespace MftReader
 
 
             String driveLetter =  args[0]; // C
-            String fileNamePath = args[1]; // @"c:\temp;
+            String fileNamePath = args[1]; // c:/temp;
+            String fileExtension = args[2]; // .cs;
             nameLst = new List<string>();
             Dictionary<ulong, FileNameAndParentFrn> mDict = new Dictionary<ulong, FileNameAndParentFrn>();
 
@@ -37,44 +48,75 @@ namespace MftReader
             mft.EnumerateVolume(out mDict);
             StringBuilder sb = new StringBuilder();
             StringBuilder pathSb = null;
-            sb.AppendLine("{'objectLst': [");
-            int i = 0;
+            String jsonFileNamePath = fileNamePath + "/" + driveLetter + ".json";
+
+            Console.WriteLine("Report file: "+jsonFileNamePath);
+
+            if(File.Exists(jsonFileNamePath))
+            {
+                File.Delete(jsonFileNamePath);
+            }
+
+            finalNameLst = new List<string>();
+            Console.WriteLine("MFT items: " + mDict.Count);
             foreach (KeyValuePair<UInt64, FileNameAndParentFrn> entry in mDict)
             {
                 FileNameAndParentFrn file = (FileNameAndParentFrn)entry.Value;
                 pathSb = new StringBuilder();
-                if (file.Name.Contains(".txt"))
+                if (file.Name.Contains(".cs"))
                 {
-                    sb.Append(driveLetter+":\\");
+                    pathSb.Append(driveLetter + ":\\");
                     searchId(file.ParentFrn, mDict);
 
                     nameLst.Reverse();
 
                     foreach (var item in nameLst)
                     {
-                        
-                        sb.Append(item + "\\");
+
+
                         pathSb.Append(item + "\\");
                     }
 
-                    if (File.Exists(file.Name))
-                    {
+                    pathSb.Append(file.Name);
 
-                        
-                        pathSb.Append(file.Name);
+                    finalNameLst.Add(pathSb.ToString());
 
+                    Console.Write("File references found: " + finalNameLst.Count + "\r");
 
-                        //long fileLenght = FileInfo(pathSb).Length;
-                        sb.AppendLine("{ \"fileName\": " + file.Name + " ");
-                    }
                     nameLst.Clear();
                 }
             }
+
+            Console.WriteLine();
+            sb.AppendLine("{\"objectLst\": [");
+            String comma = ", ";
+            for (int i = 0; i < finalNameLst.Count; i++)
+            {
+
+                String item = finalNameLst[i];
+
+                if (File.Exists(item))
+                {
+                    if (i + 1 == finalNameLst.Count) comma = "";
+                    long fileSize = new System.IO.FileInfo(item).Length;
+                    DateTime fileCreationDate = File.GetCreationTime(item);
+                    DateTime fileUpdateDate   = File.GetLastWriteTime(item);
+                    
+                    sb.AppendLine("{ \"fileName\": \"" + item + "\", \"fileSize\": "+ fileSize + ", \"fileCreationDate\": \"" + fileCreationDate + "\", \"fileUpdateDate\": \""+ fileUpdateDate + "\", \"fileAuthor\": \""+ GetOwnerName(item) + "\"}" + comma);
+                }
+                else
+                {
+                    Console.WriteLine("File not found: " + pathSb.ToString());
+                }
+
+                Console.Write("Inspecting file: " + (i+1) + "/" + finalNameLst.Count + "\r");
+            }
+
             sb.AppendLine("]}");
 
+            Console.WriteLine("\nProcess ended.");
 
-
-            WriteToFile(sb.ToString(), fileNamePath + "/" + driveLetter + ".json");
+            WriteToFile(sb.ToString(), jsonFileNamePath);
 
             Console.ReadLine();
         }
@@ -103,6 +145,7 @@ namespace MftReader
         {
             try
             {
+                
                 line = line + Environment.NewLine;
                 if (!File.Exists(fileNamePath))
                 {

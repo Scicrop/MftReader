@@ -1,6 +1,10 @@
 # MftReader
 C# NTFS/MFT Reader Example, with PInvoke
 
+## Downloads
+
+- https://github.com/Scicrop/MftReader/releases/latest
+
 ## How to run
 
 ![alt text](https://github.com/Scicrop/MftReader/blob/master/dist/mftreader-capture.png?raw=true "MftReader ScreenShot")

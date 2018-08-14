@@ -15,23 +15,25 @@ namespace MftReader.tests.Tests
         public void extractExtensionTest()
         {
 
-            String[] fileNameArray  = new String[4];
-            String[] fileExtArray   = new String[4];
+            String[] fileNameArray  = new String[5];
+            String[] fileExtArray   = new String[5];
 
             fileNameArray[0] = "test.txt";
             fileNameArray[1] = "test..txt";
             fileNameArray[2] = "test.jpeg";
             fileNameArray[3] = "te.s.t.jpeg";
+            fileNameArray[4] = "test";
 
             fileExtArray[0] = ".txt";
             fileExtArray[1] = ".txt";
             fileExtArray[2] = ".jpeg";
             fileExtArray[3] = ".jpeg";
+            fileExtArray[4] = null;
 
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 5; i++)
             {
-                Utils utils = new Utils();
-                String extension = utils.extractExtension(fileNameArray[i]);             
+                
+                String extension = Utils.Instance.ExtractExtension(fileNameArray[i]);             
                 Assert.AreEqual(fileExtArray[i], extension);
 
             }

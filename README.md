@@ -9,6 +9,8 @@ C# NTFS/MFT Reader Example, with PInvoke
   3. Folder where the .json result will be stored `c:/temp` *Do not use \ *
   4. File extension to be scanned `.shp`
 
+- ![alt text](https://github.com/Scicrop/MftReader/blob/master/dist/mftreader-capture.png?raw=true "MftReader ScreenShot")
+
 ## References
 
 - https://docs.microsoft.com/en-us/windows/desktop/fileio/master-file-table

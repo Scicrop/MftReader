@@ -7,6 +7,7 @@ using System.IO;
 using System.ComponentModel;
 using System.Security.AccessControl;
 using System.Security.Principal;
+using System.Text.RegularExpressions;
 
 namespace MftReader
 {
@@ -24,120 +25,145 @@ namespace MftReader
             return ntAccount.Value;
         }
 
+        private static void ThrowErr(string extraMessage)
+        {
+            String message = "Invalid parameters. Usage example: MftReader.exe C C:/temp/test.json .cs";
+            Console.WriteLine(message);
+            if (extraMessage != null)
+            {
+                Console.WriteLine(extraMessage);
+            }
+            Console.ReadLine();
+            System.Environment.Exit(0);
+        }
+
         static void Main(string[] args)
         {
-
-            if (args.Length != 3)
+            try
             {
-                String message = "Invalid parameters. Usage example: MftReader.exe C: C:/temp/test.json .cs";
-                Console.WriteLine(message);
-                Console.ReadLine();
-                System.Environment.Exit(0);
-            }
-
-
-            String driveLetter =  args[0]; // C
-            String fileNamePath = args[1]; // c:/temp;
-            String fileExtension = args[2]; // .cs;
-            nameLst = new List<string>();
-            Dictionary<ulong, FileNameAndParentFrn> mDict = new Dictionary<ulong, FileNameAndParentFrn>();
-
-            EnumerateVolume.PInvokeWin32 mft = new EnumerateVolume.PInvokeWin32();
-            mft.Drive = driveLetter;
-            mft.Drive = mft.Drive + ":";
-            mft.EnumerateVolume(out mDict);
-            StringBuilder sb = new StringBuilder();
-            StringBuilder pathSb = null;
-            String jsonFileNamePath = fileNamePath + "/" + driveLetter + ".json";
-
-            Console.WriteLine("Report file: "+jsonFileNamePath);
-
-            if(File.Exists(jsonFileNamePath))
-            {
-                File.Delete(jsonFileNamePath);
-            }
-
-            finalNameLst = new List<string>();
-            Console.WriteLine("MFT items: " + mDict.Count);
-            foreach (KeyValuePair<UInt64, FileNameAndParentFrn> entry in mDict)
-            {
-                FileNameAndParentFrn file = (FileNameAndParentFrn)entry.Value;
-                pathSb = new StringBuilder();
-                if (file.Name.Contains(".cs"))
+                if (args.Length != 3)
                 {
-                    pathSb.Append(driveLetter + ":\\");
-                    searchId(file.ParentFrn, mDict);
+                    ThrowErr(null);
+                }
 
-                    nameLst.Reverse();
+                String driveLetter = args[0];   // C
+                String fileNamePath = args[1];  // c:/temp;
+                String fileExtension = args[2]; // .cs;
 
-                    foreach (var item in nameLst)
+                if (driveLetter.Length > 1 || driveLetter.Contains(":") || fileNamePath.Contains("\\") || !fileExtension.Contains("."))
+                {
+                    ThrowErr(null);
+                }
+
+
+                nameLst = new List<string>();
+                Dictionary<ulong, FileNameAndParentFrn> mDict = new Dictionary<ulong, FileNameAndParentFrn>();
+
+                EnumerateVolume.PInvokeWin32 mft = new EnumerateVolume.PInvokeWin32();
+                mft.Drive = driveLetter;
+                mft.Drive = mft.Drive + ":";
+                mft.EnumerateVolume(out mDict);
+                StringBuilder sb = new StringBuilder();
+                StringBuilder pathSb = null;
+                String jsonFileNamePath = fileNamePath + "/" + driveLetter + ".json";
+
+                Console.WriteLine("Volume: " + driveLetter);
+                Console.WriteLine("Report folder: " + fileNamePath);
+                Console.WriteLine("Extension: " + fileExtension);
+
+                if (File.Exists(jsonFileNamePath))
+                {
+                    File.Delete(jsonFileNamePath);
+                }
+
+                finalNameLst = new List<string>();
+                Console.WriteLine("MFT items: " + mDict.Count);
+                foreach (KeyValuePair<UInt64, FileNameAndParentFrn> entry in mDict)
+                {
+                    FileNameAndParentFrn file = (FileNameAndParentFrn)entry.Value;
+                    pathSb = new StringBuilder();
+                    if (file.Name.Contains(".cs"))
                     {
+                        pathSb.Append(driveLetter + ":\\");
+                        searchId(file.ParentFrn, mDict);
 
+                        nameLst.Reverse();
 
-                        pathSb.Append(item + "\\");
+                        foreach (var item in nameLst)
+                        {
+                            pathSb.Append(item + "\\");
+                        }
+
+                        pathSb.Append(file.Name);
+
+                        finalNameLst.Add(pathSb.ToString());
+
+                        Console.Write("File references found: " + finalNameLst.Count + "\r");
+
+                        nameLst.Clear();
+                    }
+                }
+
+                Console.WriteLine();
+                sb.AppendLine("{\"objectLst\": [");
+                String comma = ", ";
+                int notFoundCount = 0;
+                for (int i = 0; i < finalNameLst.Count; i++)
+                {
+
+                    String item = finalNameLst[i];
+
+                    if (File.Exists(item))
+                    {
+                        if (i + 1 == finalNameLst.Count) comma = "";
+                        long fileSize = new System.IO.FileInfo(item).Length;
+                        DateTime fileCreationDate = File.GetCreationTime(item);
+                        DateTime fileUpdateDate = File.GetLastWriteTime(item);
+
+                        sb.AppendLine("{ \"fileName\": \"" + item + "\", \"fileSize\": " + fileSize + ", \"fileCreationDate\": \"" + fileCreationDate + "\", \"fileUpdateDate\": \"" + fileUpdateDate + "\", \"fileAuthor\": \"" + GetOwnerName(item) + "\"}" + comma);
+                    }
+                    else
+                    {
+                        notFoundCount++;
                     }
 
-                    pathSb.Append(file.Name);
-
-                    finalNameLst.Add(pathSb.ToString());
-
-                    Console.Write("File references found: " + finalNameLst.Count + "\r");
-
-                    nameLst.Clear();
+                    Console.Write("Inspecting file: " + (i + 1) + "/" + finalNameLst.Count + "\r");
                 }
-            }
 
-            Console.WriteLine();
-            sb.AppendLine("{\"objectLst\": [");
-            String comma = ", ";
-            for (int i = 0; i < finalNameLst.Count; i++)
+                sb.AppendLine("]}");
+                
+                WriteToFile(sb.ToString(), jsonFileNamePath);
+
+                Console.WriteLine("\nFile references not found: " + notFoundCount);
+                Console.WriteLine("Process ended. Check the results in: " + jsonFileNamePath);
+
+                Console.ReadLine();
+
+            }
+            catch (Exception e)
             {
-
-                String item = finalNameLst[i];
-
-                if (File.Exists(item))
-                {
-                    if (i + 1 == finalNameLst.Count) comma = "";
-                    long fileSize = new System.IO.FileInfo(item).Length;
-                    DateTime fileCreationDate = File.GetCreationTime(item);
-                    DateTime fileUpdateDate   = File.GetLastWriteTime(item);
-                    
-                    sb.AppendLine("{ \"fileName\": \"" + item + "\", \"fileSize\": "+ fileSize + ", \"fileCreationDate\": \"" + fileCreationDate + "\", \"fileUpdateDate\": \""+ fileUpdateDate + "\", \"fileAuthor\": \""+ GetOwnerName(item) + "\"}" + comma);
-                }
-                else
-                {
-                    Console.WriteLine("File not found: " + pathSb.ToString());
-                }
-
-                Console.Write("Inspecting file: " + (i+1) + "/" + finalNameLst.Count + "\r");
+                ThrowErr(e.Message);
             }
 
-            sb.AppendLine("]}");
-
-            Console.WriteLine("\nProcess ended.");
-
-            WriteToFile(sb.ToString(), jsonFileNamePath);
-
-            Console.ReadLine();
         }
 
         public static FileNameAndParentFrn searchId(ulong key, Dictionary<ulong, FileNameAndParentFrn> mDict)
         {
-            
+
             FileNameAndParentFrn file = null;
             if (mDict.ContainsKey(key))
             {
                 file = mDict[key];
-                
+
                 nameLst.Add(file.Name);
-                
+
                 while (file != null)
                 {
-                    file = searchId(file.ParentFrn, mDict);              
+                    file = searchId(file.ParentFrn, mDict);
                 }
             }
 
-            
+
             return file;
         }
 
@@ -145,7 +171,7 @@ namespace MftReader
         {
             try
             {
-                
+
                 line = line + Environment.NewLine;
                 if (!File.Exists(fileNamePath))
                 {

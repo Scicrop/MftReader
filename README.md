@@ -1,5 +1,6 @@
 # MftReader
-C# NTFS/MFT Reader Example, with PInvoke
+MftReader is a Command-Line interface (CLI) program which reads the Master File Table (MFT) from NTFS volume.
+(C# Implementation with PInvoke)
 
 ## Downloads
 
@@ -9,6 +10,7 @@ C# NTFS/MFT Reader Example, with PInvoke
 
 ![alt text](https://github.com/Scicrop/MftReader/blob/master/dist/mftreader-capture.png?raw=true "MftReader ScreenShot")
 
+- Open a Command Prompt as Administrator:
 - `MftReader.exe C c:/temp .shp`
   1. Executable `MftReader.exe`
   2. Volume to be scanned `C`

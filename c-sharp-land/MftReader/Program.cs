@@ -39,13 +39,14 @@ namespace MftReader
                 nameLst = new List<string>();
                 Dictionary<ulong, FileNameAndParentFrn> mDict = new Dictionary<ulong, FileNameAndParentFrn>();
 
+                long totalBytes = 0l;
                 EnumerateVolume.PInvokeWin32 mft = new EnumerateVolume.PInvokeWin32();
                 mft.Drive = driveLetter;
                 mft.Drive = mft.Drive + ":";
                 mft.EnumerateVolume(out mDict);
                 StringBuilder sb = new StringBuilder();
                 StringBuilder pathSb = null;
-                String jsonFileNamePath = fileNamePath + "/" + driveLetter + ".json";
+                String jsonFileNamePath = fileNamePath + "/" + driveLetter + fileExtension + ".json";
 
                 Console.WriteLine("Volume: " + driveLetter);
                 Console.WriteLine("Report folder: " + fileNamePath);
@@ -105,6 +106,7 @@ namespace MftReader
                         DateTime fileUpdateDate = File.GetLastWriteTime(item);
 
                         sb.AppendLine("{ \"fileName\": \"" + Uri.EscapeDataString(item) + "\", \"fileSize\": " + fileSize + ", \"fileCreationDate\": \"" + fileCreationDate + "\", \"fileUpdateDate\": \"" + fileUpdateDate + "\", \"fileAuthor\": \"" + Uri.EscapeDataString(Utils.Instance.GetOwnerName(item)) + "\"}" + comma);
+                        totalBytes = fileSize + totalBytes;
                     }
                     else
                     {
@@ -119,6 +121,7 @@ namespace MftReader
                 Utils.Instance.WriteToFile(sb.ToString(), jsonFileNamePath);
 
                 Console.WriteLine("\nFile references not found: " + notFoundCount);
+                Console.WriteLine("\nTotal bytes: " + Utils.Instance.FormatBytesLength(totalBytes));
                 Console.WriteLine("Process ended. Check the results in: " + jsonFileNamePath);
 
                 Console.WriteLine("\n[PRESS ENTER]");

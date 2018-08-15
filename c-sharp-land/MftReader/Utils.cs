@@ -103,6 +103,22 @@ namespace MftReader
                 Console.WriteLine(e.ToString());
             }
         }
+
+        public string FormatBytesLength(long length)
+        {
+            int chunk = 1024;
+            string[] sizes = { "B", "KB", "MB", "GB", "TB" };
+            double len = (double) length;
+            int order = 0;
+            while (len >= chunk && order < sizes.Length - 1)
+            {
+                ++order;
+                len = len / chunk;
+            }
+            string result = String.Format("{0:0.##} {1}", len, sizes[order]);
+
+            return result;
+        }
     }
 }
 

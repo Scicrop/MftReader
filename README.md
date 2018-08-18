@@ -14,7 +14,7 @@ MftReader is a Command-Line interface (CLI) program which reads the Master File 
 - `MftReader.exe C c:/temp .shp`
   1. Executable `MftReader.exe`
   2. Volume to be scanned `C`
-  	2.1.  Must be JUST a NTFS volume/drive letter WITHOUT ':', like C, D, F, G, etc. The current user must have administration rights over this volume.
+  2.1. Must be JUST a NTFS volume/drive letter WITHOUT ':', like C, D, F, G, etc. The current user must have administration rights over this volume.
   3. Folder where the .json result will be stored `c:/temp` *Do not use \\*
   4. File extension to be scanned `.shp`
 

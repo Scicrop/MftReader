@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
+using System.Net.NetworkInformation;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Text;
@@ -47,11 +49,15 @@ namespace MftReader
 
         public string GetOwnerName(string path)
         {
+            //string user = System.IO.File.GetAccessControl(path).GetOwner(typeof(System.Security.Principal.NTAccount)).ToString();
+
             FileSecurity fileSecurity = File.GetAccessControl(path);
             IdentityReference identityReference = fileSecurity.GetOwner(typeof(SecurityIdentifier));
             NTAccount ntAccount = identityReference.Translate(typeof(NTAccount)) as NTAccount;
             return ntAccount.Value;
         }
+
+
 
         public void ThrowErr(string extraMessage)
         {
@@ -61,7 +67,9 @@ namespace MftReader
             {
                 Console.WriteLine(extraMessage);
             }
+            Console.WriteLine("\n[PRESS ENTER]");
             Console.ReadLine();
+            
             System.Environment.Exit(0);
         }
 
@@ -103,6 +111,21 @@ namespace MftReader
                 Console.WriteLine(e.ToString());
             }
         }
+
+        public string GetFQDN()
+        {
+            string domainName = IPGlobalProperties.GetIPGlobalProperties().DomainName;
+            string hostName = Dns.GetHostName();
+
+            domainName = "." + domainName;
+            if (!hostName.EndsWith(domainName))  
+            {
+                hostName += domainName;   
+            }
+
+            return hostName;                   
+        }
+
 
         public string FormatBytesLength(long length)
         {

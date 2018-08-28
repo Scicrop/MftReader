@@ -16,6 +16,21 @@ MftReader is a Command-Line interface (CLI) program which reads the Master File 
   2. Volume to be scanned `C`. Must be JUST a NTFS volume/drive letter WITHOUT ':', like C, D, F, G, etc. The current user must have administration rights over this volume.
   3. Folder where the .json result will be stored `c:/temp`. Must be a valid folder, and the current user must have write access in it. The valid slash must be / and NOT \\.
   4. File extension to be scanned `.shp`. Is the representation of a file extension, like .txt, .pdf, .doc, etc, WITH dot (.) WITHOUT asterisk (*).
+  
+```xml
+        <MftReader.Properties.Settings>
+            <setting name="search_volume" serializeAs="String">
+                <value>C</value>
+            </setting>
+            <setting name="report_folder" serializeAs="String">
+                <value>c:/windows/temp</value>
+            </setting>
+            <setting name="search_extensions" serializeAs="String">
+                <value>.txt .pdf .doc</value>
+            </setting>
+        </MftReader.Properties.Settings>
+    </applicationSettings>
+```
 
 ## Result example
 

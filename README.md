@@ -10,12 +10,11 @@ MftReader is a Command-Line interface (CLI) program which reads the Master File 
 
 ![alt text](https://github.com/Scicrop/MftReader/blob/master/dist/mftreader-capture.png?raw=true "MftReader ScreenShot")
 
-- Open a Command Prompt as Administrator:
-- `MftReader.exe C c:/temp .shp`
-  1. Executable `MftReader.exe`
-  2. Volume to be scanned `C`. Must be JUST a NTFS volume/drive letter WITHOUT ':', like C, D, F, G, etc. The current user must have administration rights over this volume.
-  3. Folder where the .json result will be stored `c:/temp`. Must be a valid folder, and the current user must have write access in it. The valid slash must be / and NOT \\.
-  4. File extension to be scanned `.shp`. Is the representation of a file extension, like .txt, .pdf, .doc, etc, WITH dot (.) WITHOUT asterisk (*).
+- Open a Command Prompt as Administrator and type `MftReader.exe` then press `enter`
+- Fill the configuration file `MftReader.exe.config` with the following parameters:
+  1. search_volume: Example: `C`. Must be JUST a NTFS volume/drive letter WITHOUT ':', like C, D, F, G, etc. The current user must have administration rights over this volume.
+  2. report_folder: Folder where the .json result will be stored `c:/temp`. Must be a valid folder, and the current user must have write access in it. The valid slash must be / and NOT \\.
+  3. search_extensions: File extensions to be scanned `.shp`. Is the representation of a file extension, like .txt, .pdf, .doc, etc, WITH dot (.) WITHOUT asterisk (*).
   
 ```xml
         <MftReader.Properties.Settings>
@@ -29,7 +28,6 @@ MftReader is a Command-Line interface (CLI) program which reads the Master File 
                 <value>.txt .pdf .doc</value>
             </setting>
         </MftReader.Properties.Settings>
-    </applicationSettings>
 ```
 
 ## Result example

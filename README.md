@@ -21,32 +21,39 @@ MftReader is a Command-Line interface (CLI) program which reads the Master File 
 
 ```json
 {
+	"initTime": 1535481071,
+	"search_volume": "C",
+	"report_folder": "c:/windows/temp",
+	"search_extensions": ".txt .pdf .doc",
 	"objectLst": [{
-			"fileName": "C%3A%5CWindows%5CWinSxS%5Cx86_netfx4-aspnet_webadmin_code_b03f5f7f11d50a3a_4.0.14305.0_none_b5951a9f218f715e%5CApplicationConfigurationPage.cs",
-			"fileSize": 700,
-			"fileCreationDate": "16/07/2016 10:20:07",
-			"fileUpdateDate": "16/07/2016 10:20:07",
-			"fileAuthor": "NT%20SERVICE%5CTrustedInstaller",
-			"fqdn": "SCICROP-W16.TEST", 
+			"fileName": "C%3A%5CWindows%5CWinSxS%5Cwow64_microsoft-windows-mccs-syncutil_31bf3856ad364e35_10.0.14393.0_none_fe5045edee3ebb3e%5CLiveDomainList.txt",
+			"fileSize": 12,
+			"fileCreationDate": "16/07/2016 10:19:02",
+			"fileUpdateDate": "23/03/2018 11:53:59",
+			"fileAuthor": "NT%20AUTHORITY%5CSYSTEM",
+			"fqdn": "SCICROP-W16.",
 			"machineName": "SCICROP-W16"
 		},
 		{
-			"fileName": "C%3A%5CWindows%5CWinSxS%5Camd64_netfx4-aspnet_webadmin_code_b03f5f7f11d50a3a_4.0.14305.0_none_6de7e3c80d134858%5CApplicationConfigurationPage.cs",
-			"fileSize": 700,
-			"fileCreationDate": "16/07/2016 10:19:51",
-			"fileUpdateDate": "16/07/2016 10:19:51",
-			"fileAuthor": "NT%20SERVICE%5CTrustedInstaller",
-			"fqdn": "SCICROP-W16.TEST", 
+			"fileName": "C%3A%5CUsers%5CAdministrator%5CAppData%5CLocal%5CMicrosoft%5CVisualStudio%5CSettingsLogs%5Cheader.txt",
+			"fileSize": 38,
+			"fileCreationDate": "12/02/2018 14:54:12",
+			"fileUpdateDate": "26/07/2018 19:16:58",
+			"fileAuthor": "BUILTIN%5CAdministrators",
+			"fqdn": "SCICROP-W16.",
 			"machineName": "SCICROP-W16"
 		},
 		{
-			"fileName": "C%3A%5CWindows%5CMicrosoft.NET%5CFramework64%5Cv4.0.30319%5CASP.NETWebAdminFiles%5CApp_Code%5CApplicationConfigurationPage.cs",
-			"fileSize": 700,
-			"fileCreationDate": "16/07/2016 10:23:26",
-			"fileUpdateDate": "16/07/2016 10:21:30",
-			"fileAuthor": "NT%20AUTHORITY%5CSYSTEM"
+			"fileName": "C%3A%5CProgram%20Files%5CS3%20Browser%5Clicense.txt",
+			"fileSize": 5731,
+			"fileCreationDate": "22/08/2018 09:15:55",
+			"fileUpdateDate": "22/05/2017 13:34:24",
+			"fileAuthor": "BUILTIN%5CAdministrators",
+			"fqdn": "SCICROP-W16.",
+			"machineName": "SCICROP-W16"
 		}
-	]
+	],
+	"endTime": 1535481074
 }
 ```
 

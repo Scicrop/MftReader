@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("MftReader")]
-[assembly: AssemblyDescription("Reader of NTFS MFT, for a given volume letter.")]
+[assembly: AssemblyDescription("MftReader is a Command-Line interface (CLI) program which reads the Master File Table (MFT) from NTFS volume. (C# Implementation with PInvoke)")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("SciCrop")]
 [assembly: AssemblyProduct("MftReader")]
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.0.1.0")]
+[assembly: AssemblyFileVersion("1.0.1.0")]

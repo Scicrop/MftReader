@@ -173,11 +173,9 @@ namespace EnumerateVolume
             }
             catch (Exception e)
             {
-                //	Log.Info(e.Message, e);
                 Exception innerException = e.InnerException;
                 while (innerException != null)
                 {
-                    //		Log.Info(innerException.Message, innerException);
                     innerException = innerException.InnerException;
                 }
                 throw new ApplicationException("Error in EnumerateVolume()", e);

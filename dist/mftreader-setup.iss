@@ -28,6 +28,8 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "C:\Users\Administrator\Documents\GitHub\MftReader\c-sharp-land\MftReader\bin\Release\MftReader.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\Administrator\Documents\GitHub\MftReader\c-sharp-land\MftReader\bin\Release\MftReader.exe.config"; DestDir: "{app}"; Flags: ignoreversion
+
 
 [Icons]
 Name: "{commonprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"

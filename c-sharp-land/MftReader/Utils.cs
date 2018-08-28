@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -13,6 +15,7 @@ namespace MftReader
     {
 
         private static readonly Utils instance = new Utils();
+        
 
         static Utils()
         {
@@ -141,6 +144,29 @@ namespace MftReader
             string result = String.Format("{0:0.##} {1}", len, sizes[order]);
 
             return result;
+        }
+
+        private void WriteEventLog(string message)
+        {
+            try
+            {
+                string sSource = Constants.APP_SIGNATURE;
+                string sLog = "Application";
+
+                if (!EventLog.SourceExists(sSource))
+                    EventLog.CreateEventSource(sSource, sLog);
+
+                EventLog.WriteEntry(sSource, message, EventLogEntryType.Information);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public void LogException(Exception e)
+        {
+            WriteEventLog("Exception: "+e.Message+" ["+e.StackTrace+"]");
         }
     }
 }

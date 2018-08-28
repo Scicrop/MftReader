@@ -13,24 +13,22 @@ namespace MftReader
 
         public static List<String> nameLst = null;
         public static List<String> finalNameLst = null;
-
+  
         static void Main(string[] args)
         {
             try
             {
-                Console.WriteLine("### MftReader ###");
-                Console.WriteLine("### https://github.com/Scicrop/MftReader ###\n");
+                Console.WriteLine("### "+Constants.APP_SIGNATURE+" ###");
+                Console.WriteLine("### " + Constants.APP_URL + " ###\n");
                 Console.Write("Processing...\r");
-                if (args.Length != 3)
-                {
-                    Utils.Instance.ThrowErr(null);
-                }
 
-                string driveLetter = args[0];   // C
-                string fileNamePath = args[1];  // c:/temp;
-                string fileExtension = args[2].ToLower(); // .txt;
+                Int32 unixTimestampInit = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
 
-                string fileNamePathRecommendation = "The second argument (" + fileNamePath + ") must be a valid folder, and the current user must have write access in it. The valid slash must be / and NOT \\.";
+                string driveLetter = Properties.Settings.Default.search_volume;
+                string fileNamePath = Properties.Settings.Default.report_folder;
+                string fileExtension = Properties.Settings.Default.search_extensions;
+
+                string fileNamePathRecommendation = "report_folder (" + fileNamePath + ") must be a valid folder, and the current user must have write access in it. The valid slash must be / and NOT \\.";
 
                 if (!Directory.Exists(fileNamePath))
                 {
@@ -41,9 +39,9 @@ namespace MftReader
 
                 if (driveLetter.Length > 1 || driveLetter.Contains(":") || fileNamePath.Contains("\\") || !fileExtension.Contains(".") || fileExtension.Contains("*"))
                 {
-                    Utils.Instance.ThrowErr("\n\n1. The first argument ("+driveLetter+") must be JUST a NTFS volume/drive letter WITHOUT ':', like C, D, F, G, etc. The current user must have administration rights over this volume.\n\n" +
+                    Utils.Instance.ThrowErr("\n\nCheck the config file:\n\n1. search_volume (" + driveLetter+") must be JUST a NTFS volume/drive letter WITHOUT ':', like C, D, F, G, etc. The current user must have administration rights over this volume.\n\n" +
                         "2. "+fileNamePathRecommendation+"\n\n" +
-                        "3. The third argument ("+fileExtension+ ") is the representation of a file extension, like .txt, .pdf, .doc, etc, WITH dot (.) WITHOUT asterisk (*).");
+                        "3. search_extensions (" + fileExtension+ ") is the representation of a file extension, like .txt, .pdf, .doc, etc, WITH dot (.) WITHOUT asterisk (*).");
                 }
 
 
@@ -57,7 +55,7 @@ namespace MftReader
                 mft.EnumerateVolume(out mDict);
                 StringBuilder sb = new StringBuilder();
                 StringBuilder pathSb = null;
-                String jsonFileNamePath = fileNamePath + "/" + driveLetter + fileExtension + ".json";
+                String jsonFileNamePath = fileNamePath + "/" + driveLetter + "." + unixTimestampInit + ".json";
 
                 Console.Write("Volume: " + driveLetter+"\t\t\n");
                 Console.WriteLine("Report folder: " + fileNamePath);
@@ -78,7 +76,7 @@ namespace MftReader
 
                     string extractedExtension = Utils.Instance.ExtractExtension(file.Name);
 
-                    if (extractedExtension != null && extractedExtension.ToLower().Equals(fileExtension))
+                    if (extractedExtension != null && fileExtension.ToLower().Contains(extractedExtension.ToLower()))
                     {
                         pathSb.Append(driveLetter + ":\\");
                         Utils.Instance.SearchId(file.ParentFrn, mDict);
@@ -101,7 +99,7 @@ namespace MftReader
                 }
 
                 Console.WriteLine();
-                sb.AppendLine("{\"objectLst\": [");
+                sb.AppendLine("{\"initTime\": "+ unixTimestampInit + ", \"search_volume\": \""+driveLetter+"\", \"report_folder\": \""+fileNamePath+"\", \"search_extensions\": \""+fileExtension+"\", \"objectLst\": [");
                 String comma = ", ";
                 int notFoundCount = 0;
                 int ownerExceptionCount = 0;
@@ -123,21 +121,24 @@ namespace MftReader
                         string fqdn = "n/a";
 
                         try { owner = Utils.Instance.GetOwnerName(item); }
-                        catch (Exception) 
+                        catch (Exception e) 
                         {
-                            ownerExceptionCount++;    
+                            ownerExceptionCount++;
+                            Utils.Instance.LogException(e);
                         } finally { owner = Uri.EscapeDataString(owner); }
 
                         try { machineName = Environment.MachineName; }
-                        catch (Exception)
+                        catch (Exception e)
                         {
                             machineNameExceptionCount++;
+                            Utils.Instance.LogException(e);
                         }  finally { machineName = Uri.EscapeDataString(machineName); }
 
                         try { fqdn = Utils.Instance.GetFQDN(); }
-                        catch (Exception)
+                        catch (Exception e)
                         {
                             fqdnExceptionCount++;
+                            Utils.Instance.LogException(e);
                         }
                         finally { fqdn = Uri.EscapeDataString(fqdn); }
 
@@ -151,8 +152,8 @@ namespace MftReader
 
                     Console.Write("Inspecting file: " + (i + 1) + "/" + finalNameLst.Count + "\r");
                 }
-
-                sb.AppendLine("]}");
+                Int32 unixTimestampEnd = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+                sb.AppendLine("], \"endTime\": "+unixTimestampEnd+" }");
 
                 Utils.Instance.WriteToFile(sb.ToString(), jsonFileNamePath);
 
@@ -170,6 +171,7 @@ namespace MftReader
             catch (Exception e)
             {
                 Utils.Instance.ThrowErr(e.Message);
+                Utils.Instance.LogException(e);
             }
 
         }

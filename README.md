@@ -16,7 +16,9 @@ MftReader is a Command-Line interface (CLI) program which reads the Master File 
   2. report_folder: Folder where the .json result will be stored, example `c:/windows/temp`. Must be a valid folder, and the current user must have write access in it. The valid slash must be / and NOT \\.
   3. search_extensions: File extensions to be scanned, example `.txt .pdf .doc`. Is the representation of a file extension, like .txt, .pdf, .doc, etc, WITH dot (.) WITHOUT asterisk (*).
 - Open a Command Prompt as Administrator and type `MftReader.exe` then press `enter`
-  
+
+## Configuration file example
+
 ```xml
         <MftReader.Properties.Settings>
             <setting name="search_volume" serializeAs="String">

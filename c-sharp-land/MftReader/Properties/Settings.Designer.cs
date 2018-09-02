@@ -43,10 +43,19 @@ namespace MftReader.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("txt pdf doc")]
+        [global::System.Configuration.DefaultSettingValueAttribute(".txt .pdf .doc")]
         public string search_extensions {
             get {
                 return ((string)(this["search_extensions"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool calc_md5 {
+            get {
+                return ((bool)(this["calc_md5"]));
             }
         }
     }

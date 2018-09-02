@@ -6,6 +6,7 @@ using System.IO;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Security.AccessControl;
+using System.Security.Cryptography;
 using System.Security.Principal;
 using System.Text;
 
@@ -15,7 +16,7 @@ namespace MftReader
     {
 
         private static readonly Utils instance = new Utils();
-        
+
 
         static Utils()
         {
@@ -72,7 +73,7 @@ namespace MftReader
             }
             Console.WriteLine("\n[PRESS ENTER]");
             Console.ReadLine();
-            
+
             System.Environment.Exit(0);
         }
 
@@ -121,12 +122,12 @@ namespace MftReader
             string hostName = Dns.GetHostName();
 
             domainName = "." + domainName;
-            if (!hostName.EndsWith(domainName))  
+            if (!hostName.EndsWith(domainName))
             {
-                hostName += domainName;   
+                hostName += domainName;
             }
 
-            return hostName;                   
+            return hostName;
         }
 
 
@@ -134,7 +135,7 @@ namespace MftReader
         {
             int chunk = 1024;
             string[] sizes = { "B", "KB", "MB", "GB", "TB" };
-            double len = (double) length;
+            double len = (double)length;
             int order = 0;
             while (len >= chunk && order < sizes.Length - 1)
             {
@@ -166,7 +167,37 @@ namespace MftReader
 
         public void LogException(Exception e)
         {
-            WriteEventLog("Exception: "+e.Message+" ["+e.StackTrace+"]");
+            WriteEventLog("Exception: " + e.Message + " [" + e.StackTrace + "]");
+        }
+
+        public string ByteArrayToMd5HashString(byte[] input)
+        {
+            StringBuilder hash = new StringBuilder();
+            MD5CryptoServiceProvider md5provider = new MD5CryptoServiceProvider();
+            byte[] bytes = md5provider.ComputeHash(input);
+
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                hash.Append(bytes[i].ToString("x2"));
+            }
+            return hash.ToString();
+        }
+
+        public long GetDriveTotalSize(string driveLetter)
+        {
+            long totalSize = 0;
+            DriveInfo[] allDrives = DriveInfo.GetDrives();
+
+            foreach (DriveInfo d in allDrives)
+            {
+                if(d.Name.ToLower().Equals(driveLetter.ToLower()+":\\"))
+                {
+                    totalSize = d.TotalSize;
+                    break;
+                }
+            }
+
+            return totalSize;
         }
     }
 }

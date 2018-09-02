@@ -27,6 +27,7 @@ namespace MftReader
                 string driveLetter = Properties.Settings.Default.search_volume;
                 string fileNamePath = Properties.Settings.Default.report_folder;
                 string fileExtension = Properties.Settings.Default.search_extensions;
+                bool calcMd5 = Properties.Settings.Default.calc_md5;
 
                 string fileNamePathRecommendation = "report_folder (" + fileNamePath + ") must be a valid folder, and the current user must have write access in it. The valid slash must be / and NOT \\.";
 
@@ -61,6 +62,17 @@ namespace MftReader
                 Console.WriteLine("Report folder: " + fileNamePath);
                 Console.WriteLine("Extension: " + fileExtension);
 
+                long totalDriveSize = 0;
+
+                try
+                {
+                    totalDriveSize = Utils.Instance.GetDriveTotalSize(driveLetter);
+                }
+                catch(Exception e)
+                {
+                    Utils.Instance.LogException(e);
+                }
+
                 if (File.Exists(jsonFileNamePath))
                 {
                     File.Delete(jsonFileNamePath);
@@ -92,6 +104,8 @@ namespace MftReader
 
                         finalNameLst.Add(pathSb.ToString());
 
+                        
+
                         Console.Write("File references found: " + finalNameLst.Count + "\r");
 
                         nameLst.Clear();
@@ -99,12 +113,13 @@ namespace MftReader
                 }
 
                 Console.WriteLine();
-                sb.AppendLine("{\"initTime\": "+ unixTimestampInit + ", \"search_volume\": \""+driveLetter+"\", \"report_folder\": \""+fileNamePath+"\", \"search_extensions\": \""+fileExtension+"\", \"objectLst\": [");
+                sb.AppendLine("{\"initTime\": "+ unixTimestampInit + ", \"search_volume\": \""+driveLetter+"\", \"report_folder\": \""+fileNamePath+"\", \"search_extensions\": \""+fileExtension+ "\", \"totalDriveSize\": "+ totalDriveSize + ", \"objectLst\": [");
                 String comma = ", ";
                 int notFoundCount = 0;
                 int ownerExceptionCount = 0;
                 int machineNameExceptionCount = 0;
                 int fqdnExceptionCount = 0;
+                int md5ExceptionCount = 0;
                 for (int i = 0; i < finalNameLst.Count; i++)
                 {
 
@@ -119,6 +134,25 @@ namespace MftReader
                         string owner = "n/a";
                         string machineName = "n/a";
                         string fqdn = "n/a";
+                        string md5Hash = "";
+
+
+                        if (calcMd5)
+                        {
+                            try
+                            {
+                                byte[] byteArray = File.ReadAllBytes(item);
+                                string strMd5 = Utils.Instance.ByteArrayToMd5HashString(byteArray);
+                                md5Hash = ", \"md5\": \""+ strMd5 + "\"";
+                            }
+                            catch(Exception e)
+                            {
+                                md5ExceptionCount++;
+                                md5Hash = ", \"md5\": \"n/a\"";
+                                Utils.Instance.LogException(e);
+                            }
+                        }
+
 
                         try { owner = Utils.Instance.GetOwnerName(item); }
                         catch (Exception e) 
@@ -142,7 +176,7 @@ namespace MftReader
                         }
                         finally { fqdn = Uri.EscapeDataString(fqdn); }
 
-                        sb.AppendLine("{ \"fileName\": \"" + Uri.EscapeDataString(item) + "\", \"fileSize\": " + fileSize + ", \"fileCreationDate\": \"" + fileCreationDate + "\", \"fileUpdateDate\": \"" + fileUpdateDate + "\", \"fileAuthor\": \"" + owner + "\", \"fqdn\": \""+ fqdn +"\", \"machineName\": \""+ machineName +"\"}" + comma);
+                        sb.AppendLine("{ \"fileName\": \"" + Uri.EscapeDataString(item) + "\", \"fileSize\": " + fileSize + ", \"fileCreationDate\": \"" + fileCreationDate + "\", \"fileUpdateDate\": \"" + fileUpdateDate + "\", \"fileAuthor\": \"" + owner + "\", \"fqdn\": \""+ fqdn +"\" "+md5Hash+"}" + comma);
                         totalBytes = fileSize + totalBytes;
                     }
                     else
@@ -161,6 +195,7 @@ namespace MftReader
                 Console.WriteLine("FQDN resolution errors: " + fqdnExceptionCount);
                 Console.WriteLine("Machine Name resolution errors: " + machineNameExceptionCount);
                 Console.WriteLine("File ownership resolution errors: " + ownerExceptionCount);
+                Console.WriteLine("MD5 hash errors: " + md5ExceptionCount);
                 Console.WriteLine("\nTotal bytes: " + Utils.Instance.FormatBytesLength(totalBytes));
                 Console.WriteLine("Process ended. Check the results in: " + jsonFileNamePath);
 

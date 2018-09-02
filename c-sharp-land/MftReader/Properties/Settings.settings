@@ -9,7 +9,10 @@
       <Value Profile="(Default)">c:/windows/temp</Value>
     </Setting>
     <Setting Name="search_extensions" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">txt pdf doc</Value>
+      <Value Profile="(Default)">.txt .pdf .doc</Value>
+    </Setting>
+    <Setting Name="calc_md5" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">True</Value>
     </Setting>
   </Settings>
 </SettingsFile>

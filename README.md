@@ -6,6 +6,11 @@ MftReader is a Command-Line interface (CLI) program which reads the Master File 
 
 - https://github.com/Scicrop/MftReader/releases/latest
 
+## How to install
+
+- Open the directory where the file mftreader_setup.exe was downloaded and double-click it
+  - Windows 10: You may need permission to run unsigned executable files or may need to enable Developer Mode
+
 ## How to run
 
 ![alt text](https://github.com/Scicrop/MftReader/blob/master/dist/mftreader-capture.png?raw=true "MftReader ScreenShot")

@@ -9,7 +9,8 @@ MftReader is a Command-Line interface (CLI) program which reads the Master File 
 ## How to install
 
 - Open the directory where the file mftreader_setup.exe was downloaded and double-click it
-  - Windows 10: You may need permission to run unsigned executable files or may need to enable Developer Mode
+  - Windows 10: You may need permission to run unsigned executable files
+    - If a dialog "Windows protected your PC" appears, you have to click on the "More info" link and "Run anyway" button
 
 ## How to run
 
